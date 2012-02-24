@@ -115,6 +115,7 @@ class BootstrapMixin(object):
                 'label' : mark_safe(bf.label or ''),
                 'help_text' :mark_safe(help_text),
                 'field' : field_instance,
+                'field_name' : field,
                 'bf' : mark_safe(unicode(bf)),
                 'bf_raw' : bf,
                 'errors' : mark_safe(bf_errors),
@@ -159,10 +160,10 @@ class BootstrapModelForm(forms.ModelForm, BootstrapMixin):
 class Fieldset(object):
     """ Fieldset container. Renders to a <fieldset>. """
 
-    def __init__(self, legend, css_class=None, *fields):
+    def __init__(self, legend, *fields):
         self.legend_html = legend and ('<legend>%s</legend>' % legend) or ''
         self.fields = fields
-        self.css_class = css_class
+        self.css_class = None
     
     def as_html(self, form):
         class_str = self.css_class and (' class="%s"' % self.css_class) or ''
