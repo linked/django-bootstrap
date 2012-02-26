@@ -1,10 +1,10 @@
-<div class="control-group{% if errors %} error{% endif %} {{field_name}}" id="div_id_{{field_name}}">
-    <label class="control-label">{{ label }}</label>
+<div class="control_group{% if errors %} error{% endif %} {{field_name}}" id="div_id_{{field_name}}">
+    <label class="control_label">{{ label }}</label>
     <div class="controls">
         {{ bf }}
         {% if errors %}
-        <span class="help-inline">{{ errors }}</span>
+        <span class="help_inline">{{ errors }}</span>
         {% endif %}
-        <p class="help-block">{{ help_text }}</p>
+        <p class="help_block">{{ help_text }}</p>
     </div>
 </div> <!-- /clearfix -->
