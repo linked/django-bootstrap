@@ -10,14 +10,10 @@ class NoSuchFormField(Exception):
     """""The form field couldn't be resolved."""""
     pass
 
-def error_list(errors):
-    return '<ul class="errors"><li>' + \
-           '</li><li>'.join(errors) + \
-           '</li></ul>'
-
 class BootstrapMixin(object):
 
-    def __bootstrap__(self):
+    def __init__(self, *args, **kwargs):
+        super(BootstrapMixin, self).__init__(*args, **kwargs)
         # do we have an explicit layout?
         if hasattr(self, 'Meta') and hasattr(self.Meta, 'layout'):
             self.layout = self.Meta.layout
@@ -35,16 +31,24 @@ class BootstrapMixin(object):
         else:
             self.template_base = "bootstrap"
 
+    # For backward compatibility
+    __bootstrap__ = __init__
+
+    def top_errors_as_html(self):
+        """ Render top errors as set of <div>'s. """
+        return ''.join(["<div class=\"alert alert-error\">%s</div>" % error
+                        for error in self.top_errors])
+
     def as_div(self):
         """ Render the form as a set of <div>s. """
 
-        self.top_errors = []
+        self.top_errors = self.non_field_errors()
         self.prefix_fields = []
 
         output = self.render_fields(self.layout)
 
         if self.top_errors:
-            errors = error_list(self.top_errors)
+            errors = self.top_errors_as_html()
         else:
             errors = u''
 
@@ -134,36 +138,26 @@ class BootstrapMixin(object):
 
         return mark_safe(output)
 
-class BootstrapForm(forms.Form, BootstrapMixin):
-    def __init__(self, *args, **kwargs):
-        forms.Form.__init__(self, *args, **kwargs)
-        self.__bootstrap__()
-
-    # Default output is now as <div> tags.
-    def __str__(self):
-        return self.as_div()
-
     def __unicode__(self):
+        # Default output is now as <div> tags.
         return self.as_div()
 
-class BootstrapModelForm(forms.ModelForm, BootstrapMixin):
-    def __init__(self, *args, **kwargs):
-        forms.ModelForm.__init__(self, *args, **kwargs)
-        self.__bootstrap__()
 
-    def __str__(self):
-        return self.as_div()
+class BootstrapForm(BootstrapMixin, forms.Form):
+    pass
 
-    def __unicode__(self):
-        return self.as_div()
+
+class BootstrapModelForm(BootstrapMixin, forms.ModelForm):
+    pass
+
 
 class Fieldset(object):
     """ Fieldset container. Renders to a <fieldset>. """
 
-    def __init__(self, legend, *fields):
+    def __init__(self, legend, *fields, **kwargs):
         self.legend_html = legend and ('<legend>%s</legend>' % legend) or ''
         self.fields = fields
-        self.css_class = None
+        self.css_class = kwargs.get('css_class')
     
     def as_html(self, form):
         class_str = self.css_class and (' class="%s"' % self.css_class) or ''
